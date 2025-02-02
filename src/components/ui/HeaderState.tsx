@@ -23,9 +23,6 @@ const Header = () => {
   const { theme, setTheme } = useTheme();
   const [isGenreOpen, setIsGenreOpen] = useState(false);
 
-  // Debugging: log isGenreOpen
-  console.log("Is Genre Dropdown Open:", isGenreOpen);
-
   return (
     <div className="h-[59px] bg-background flex items-center justify-center">
       <div className="flex items-center justify-between w-full max-w-screen-xl px-5 lg:px-0">
@@ -52,11 +49,7 @@ const Header = () => {
           >
             Genre
             {isGenreOpen && (
-              <div
-                className={`dropdown ${
-                  theme === "dark" ? "dropdown-dark" : "dropdown-light"
-                }`}
-              >
+              <div className="absolute top-10 left-0 bg-white shadow-md rounded-md w-48 z-10">
                 <ul>
                   {genres.map((genre, index) => (
                     <li
