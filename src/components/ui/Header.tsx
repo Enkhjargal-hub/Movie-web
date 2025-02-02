@@ -1,44 +1,40 @@
-"use client";
+// components/ui/Header.tsx
+'use client';
 
-import React from "react";
-import { Film, Search, Moon, Sun } from "lucide-react";
-import { Button } from "@/app/ui/button";
-import { useTheme } from "next-themes";
+import { useTheme } from 'next-themes';
+import { Button } from '@/components/ui/button';
+import { Moon, Sun } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
-const Header = () => {
-  const { setTheme, theme } = useTheme();
+export default function Header() {
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true); // Only run on the client-side
+  }, []);
+
+  if (!mounted) return null;
 
   return (
-    <header className="mx-5 flex items-center justify-between my-5">
-      <div className="flex gap-2 text-indigo-700">
-        <Film />
-        <p className="font-bold italic">Movie Z</p>
+    <header className={`flex justify-between items-center p-4 ${theme === 'dark' ? 'bg-gray-900' : 'bg-indigo-700'} text-white`}>
+      <div className="flex items-center gap-2">
+        <h1 className="text-xl font-bold">Movie Z</h1>
       </div>
-      <div className="flex gap-3">
+      <div className="flex items-center gap-3">
         <Button variant="outline" className="w-9 h-9">
-          <Search />
+          Search
         </Button>
-
-        {theme === "dark" ? (
-          <Button
-            variant="outline"
-            className="w-9 h-9 font-bold"
-            onClick={() => setTheme("light")}
-          >
+        {theme === 'dark' ? (
+          <Button variant="outline" className="w-9 h-9" onClick={() => setTheme('light')}>
             <Sun />
           </Button>
         ) : (
-          <Button
-            variant="outline"
-            className="w-9 h-9 font-bold"
-            onClick={() => setTheme("dark")}
-          >
+          <Button variant="outline" className="w-9 h-9" onClick={() => setTheme('dark')}>
             <Moon />
           </Button>
         )}
       </div>
     </header>
   );
-};
-
-export default Header;
+}
