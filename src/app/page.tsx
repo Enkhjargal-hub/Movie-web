@@ -6,9 +6,6 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-const TMDB_BASE_URL = process.env.NEXT_PUBLIC_TMDB_BASE_URL || "https://api.themoviedb.org/3";
-const TMDB_IMAGE_SERVICE_URL = process.env.NEXT_PUBLIC_TMDB_IMAGE_URL || "https://image.tmdb.org/t/p";
-const TMDB_API_TOKEN = process.env.NEXT_PUBLIC_TMDB_API_TOKEN;
 
 interface Movie {
   id: number;
@@ -19,15 +16,19 @@ interface Movie {
 export default function Home() {
   const { push } = useRouter();
   const [popularMovies, setPopularMovies] = useState<Movie[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchMovies = async () => {
       try {
-        const response = await axios.get(`${TMDB_BASE_URL}/movie/popular`, {
-          params: { language: "en-US", page: 1 },
-          headers: { Authorization: `Bearer ${TMDB_API_TOKEN}` },
-        });
+        setLoading(true);
+        const response = await axios.get(
+          `${process.env.TMDB_BASE_URL}/movie/popular?language=en-US&page=1`,
+          {
+            headers: { Authorization: `Bearer ${process.env.TMDB_API_TOKEN}` },
+          }
+        );
+        console.log(response);
         setPopularMovies(response.data.results);
       } catch (err) {
         console.error("Error fetching movies:", err);
@@ -35,7 +36,6 @@ export default function Home() {
         setLoading(false);
       }
     };
-
     fetchMovies();
   }, []);
 
@@ -50,7 +50,7 @@ export default function Home() {
           <div className="relative w-full h-64">
             {movie.poster_path && (
               <Image
-                src={`${TMDB_IMAGE_SERVICE_URL}/w500${movie.poster_path}`}
+                src={`${process.env.TMDB_IMAGE_URL}/w500${movie.poster_path}`}
                 alt={movie.title}
                 fill
                 className="rounded-md object-cover"
@@ -69,5 +69,3 @@ export default function Home() {
     </div>
   );
 }
-
-

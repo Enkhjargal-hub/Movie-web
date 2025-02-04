@@ -9,11 +9,10 @@ const nextConfig: NextConfig = {
     ],
   },
   env: {
-    TDMB_BASE_URL: process.env.TDMB_BASE_URL || "",
-    TDMB_API_TOKEN: process.env.TDMB_API_TOKEN || "",
-    TDMB_IMAGE_SERVICE_URL: process.env.TDMB_IMAGE_SERVICE_URL || "",
+    TMDB_BASE_URL: process.env.TMDB_BASE_URL || "",
+    TMDB_API_TOKEN: process.env.TMDB_API_TOKEN || "",
+    TMDB_IMAGE_URL: process.env.TMDB_IMAGE_URL || "",
   },
 };
 
 export default nextConfig;
-
