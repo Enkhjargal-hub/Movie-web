@@ -20,7 +20,7 @@ interface Movie {
 const fetchMovies = async () => {
   try {
     const response = await axios.get(
-      `${process.env.TMDB_BASE_URL}/movie/now_playing?language=en-US&page=1`,
+      `${process.env.TMDB_BASE_URL}/movie/popular?language=en-US&page=1`,
       {
         headers: { Authorization: `Bearer ${process.env.TMDB_API_TOKEN}` },
       }
@@ -57,7 +57,7 @@ export function MovieCarousel() {
           {movies.map((movie) => (
             <div key={movie.id} className="relative w-full h-[600px]">
               <Image
-                src={`https://image.tmdb.org/t/p/original${movie.poster_path}`}
+                src={`${process.env.TMDB_IMAGE_URL || "https://image.tmdb.org/t/p"}/w500${movie.poster_path}`}
                 alt={movie.title}
                 fill
                 className="object-cover w-full h-full"
@@ -104,7 +104,7 @@ export default function Home() {
           <div key={movie.id} className="shadow-xl cursor-pointer" onClick={() => push(`/detail/${movie.id}`)}>
             <div className="relative w-full h-72">
               <Image
-                src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                src={`${process.env.TMDB_IMAGE_URL || "https://image.tmdb.org/t/p"}/w500${movie.poster_path}`}
                 alt={movie.title}
                 fill
                 className="rounded-md object-cover"
