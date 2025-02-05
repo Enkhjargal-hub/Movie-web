@@ -17,15 +17,16 @@ interface Movie {
   vote_average: number;
 }
 
+const TMDB_BASE_URL = process.env.TMDB_BASE_URL || "https://api.themoviedb.org/3";
+const TMDB_API_TOKEN = process.env.TMDB_API_TOKEN || "";
+const TMDB_IMAGE_URL = process.env.TMDB_IMAGE_URL || "https://image.tmdb.org/t/p";
+
 const fetchMovies = async () => {
   try {
-    const response = await axios.get(
-      `${process.env.TMDB_BASE_URL}/movie/popular?language=en-US&page=1`,
-      {
-        headers: { Authorization: `Bearer ${process.env.TMDB_API_TOKEN}` },
-      }
-    );
-    return response.data.results;
+    const response = await axios.get(`${TMDB_BASE_URL}/movie/popular?language=en-US&page=1`, {
+      headers: { Authorization: `Bearer ${TMDB_API_TOKEN}` },
+    });
+    return response.data.results || [];
   } catch (err) {
     console.error("Error fetching movies:", err);
     return [];
@@ -40,7 +41,7 @@ export function MovieCarousel() {
   }, []);
 
   const sliderSettings = {
-    dots: false,
+    dots: true,
     infinite: true,
     speed: 600,
     slidesToShow: 1,
@@ -57,7 +58,7 @@ export function MovieCarousel() {
           {movies.map((movie) => (
             <div key={movie.id} className="relative w-full h-[600px]">
               <Image
-                src={`${process.env.TMDB_IMAGE_URL || "https://image.tmdb.org/t/p"}/w500${movie.poster_path}`}
+                src={`${TMDB_IMAGE_URL}/w500${movie.poster_path}`}
                 alt={movie.title}
                 fill
                 className="object-cover w-full h-full"
@@ -104,7 +105,7 @@ export default function Home() {
           <div key={movie.id} className="shadow-xl cursor-pointer" onClick={() => push(`/detail/${movie.id}`)}>
             <div className="relative w-full h-72">
               <Image
-                src={`${process.env.TMDB_IMAGE_URL || "https://image.tmdb.org/t/p"}/w500${movie.poster_path}`}
+                src={`${TMDB_IMAGE_URL}/w500${movie.poster_path}`}
                 alt={movie.title}
                 fill
                 className="rounded-md object-cover"
