@@ -1,70 +1,60 @@
-"use client"
-import React, { useState, useEffect } from 'react'
-import { useParams, useRouter } from 'next/navigation'
-import { Search } from 'lucide-react'
+"use client";
+import React, { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { Search } from "lucide-react";
+import CardComp from "@/components/ui/CardComp"; 
 
-// You can define a type for your props if needed
 const SearchPage = () => {
-  const [inputValue, setInputValue] = useState<string>('');
+  const [inputValue, setInputValue] = useState<string>("");
   const params = useParams();
   const router = useRouter();
 
-  // Input handler with proper type
+
+  const searchTerm = params?.id ? decodeURIComponent(params.id as string) : "";
+
+
+  useEffect(() => {
+    setInputValue(searchTerm);
+  }, [searchTerm]);
+
   const inputHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value);
   };
 
-  // Extracts search term from params if available
-  const searchSpellCheck = (): string => {
-    if (params?.id) {
-      const search = params.id;
-      const result = search.toString().replaceAll("%20", " ");
-      return result;
-    }
-    return '';
-  };
-
-  // Sets the input value based on the search term from params
-  useEffect(() => {
-    setInputValue(searchSpellCheck());
-  }, [params]);
-
-  // Handles the search when input is provided
-  const searchHandler = (inputValue: string): void => {
+  const searchHandler = (inputValue: string) => {
     if (inputValue.trim().length > 0) {
-      router.push(`/search/${inputValue}`);
+      router.push(`/search/${encodeURIComponent(inputValue)}`);
     }
   };
 
-  // Handles "Enter" key to trigger the search
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>, inputValue: string) => {
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
       searchHandler(inputValue);
     }
   };
 
   return (
-    <div className='w-full h-full flex flex-col items-center'>
-      <div className='w-[80%] flex flex-col justify-center mt-40'>
-        <div className='w-full h-16 bg-[#090b13] rounded-xl flex justify-between items-center p-4'>
+    <div className="w-full h-full flex flex-col items-center">
+      <div className="w-[80%] flex flex-col justify-center mt-40">
+        <div className="w-full h-16 bg-[#090b13] rounded-xl flex justify-between items-center p-4">
           <input
-            onKeyDown={(e) => handleKeyDown(e, inputValue)}
+            onKeyDown={handleKeyDown}
             onChange={inputHandler}
-            type='text'
+            type="text"
             value={inputValue}
-            className='w-full h-full bg-[#090b13] outline-none text-white text-base font-regular pl-4'
+            className="w-full h-full bg-[#090b13] outline-none text-white text-base font-regular pl-4"
           />
           <Search
             onClick={() => searchHandler(inputValue)}
-            className='stroke-white w-10 cursor-pointer'
+            className="stroke-white w-10 cursor-pointer"
           />
         </div>
-        <p className='text-slate-500 mt-4'>
-          Results of your search: <span className='text-white font-bold'>{`"${searchSpellCheck()}"`}</span>
+        <p className="text-slate-500 mt-4">
+          Results of your search: <span className="text-white font-bold">{`"${searchTerm}"`}</span>
         </p>
       </div>
-      <div className='w-[80%] h-auto mt-10 mb-20'>
-        <CardComp movieData={searchSpellCheck()} slideTitle="" search={true} />
+      <div className="w-[80%] h-auto mt-10 mb-20">
+        <CardComp movieData={searchTerm} slideTitle="" search={true} />
       </div>
     </div>
   );
