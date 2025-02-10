@@ -45,7 +45,6 @@ const MovieDetail = () => {
 
   if (loading) return <div>Loading movie details...</div>;
   if (error) return <div>{error}</div>;
-
   if (!movie) return <div>No movie data found.</div>;
 
   return (
