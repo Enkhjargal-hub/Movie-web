@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Movie } from "@/components/ui/types";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation"; // React Router-тэй адил Next.js hook
+import { useRouter } from "next/navigation";
 
 export default function Movies() {
   const TMDB_BASE_URL = process.env.TMDB_BASE_URL || "https://api.themoviedb.org/3";
@@ -31,10 +31,14 @@ export default function Movies() {
         }
       );
       if (response.data && response.data.results) {
-        setData(response.data.results.slice(0, 5));
+        setData(response.data.results.slice(0, 5)); // Limit to 5 results
       } else {
         setError(`No ${category} movies found.`);
       }
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : "Unknown error occurred";
+      setError("Error fetching movies: " + errorMsg);
+      console.error(errorMsg); // Log error for debugging
     } finally {
       setLoading(false);
     }
@@ -78,22 +82,63 @@ const Section = ({ title, movies }: { title: string; movies: Movie[] }) => (
 );
 
 const MovieCard = ({ movie }: { movie: Movie }) => {
+  const [trailerUrl, setTrailerUrl] = useState<string | null>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    const fetchTrailer = async () => {
+      const TMDB_BASE_URL = process.env.TMDB_BASE_URL || "https://api.themoviedb.org/3";
+      const TMDB_API_TOKEN = process.env.TMDB_API_TOKEN;
+
+      if (TMDB_API_TOKEN && movie.id) {
+        try {
+          const response = await axios.get(
+            `${TMDB_BASE_URL}/movie/${movie.id}/videos?language=en-US`,
+            {
+              headers: { Authorization: `Bearer ${TMDB_API_TOKEN}` },
+            }
+          );
+          if (response.data && response.data.results) {
+            const trailer = response.data.results.find((video: any) => video.type === "Trailer");
+            if (trailer) {
+              setTrailerUrl(`https://www.youtube.com/watch?v=${trailer.key}`);
+            } else {
+              setTrailerUrl(null);
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching trailer:", error);
+          setTrailerUrl(null); // Handle error case
+        }
+      }
+    };
+
+    fetchTrailer();
+  }, [movie.id]);
 
   return (
     <div
       className="relative w-[200px] min-w-[200px] h-[300px] rounded-lg overflow-hidden shadow-lg cursor-pointer transition-transform transform hover:scale-105"
-      onClick={() => router.push(`/movies/${movie.id}`)} // Кино дэлгэрэнгүй хуудас руу шилжих
+      onClick={() => router.push(`/movies/${movie.id}`)} // Navigate to movie details page
     >
       <img
         src={movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : "https://via.placeholder.com/200x300"}
-        alt={movie.title}
+        alt={movie.title || "Untitled"}
         className="w-full h-full object-cover"
       />
       <div className="absolute bottom-0 bg-black bg-opacity-60 text-white w-full p-2 text-sm font-medium text-center">
-        {movie.title}
-        <p className="text-yellow-400 text-xs">⭐ {movie.vote_average?.toFixed(1) || "N/A"}/10</p>
+        {movie.title || "Untitled"}
+        <p className="text-yellow-400 text-xs">
+          ⭐ {movie.vote_average ? movie.vote_average.toFixed(1) : "N/A"}/10
+        </p>
       </div>
+      {trailerUrl && (
+        <div className="absolute top-0 right-0 bg-black bg-opacity-60 text-white p-2 rounded-bl-lg">
+          <a href={trailerUrl} target="_blank" rel="noopener noreferrer" className="text-yellow-400">
+            Watch Trailer
+          </a>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,48 +1,59 @@
-import React, { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+"use client";
+
+import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useRouter } from "next/navigation"; 
+import { Movie } from "@/components/ui/types";
+import { Button } from "@/components/ui/button";
 
-interface Movie {
-  title: string;
-  release_date: string;
-  runtime: number;
-  vote_average: number;
-  poster_path: string | null;
-  genres: { id: number; name: string }[];
-  overview: string;
-  videos: {
-    results: { key: string }[];
-  };
-}
-
-export default function MovieDetail() {
-  const params = useParams();
-  const id = params?.id ?? "";  
+const MovieDetails = () => {
+  const router = useRouter();
+  const { id } = router.query; // Get the movie ID from the URL
   const [movie, setMovie] = useState<Movie | null>(null);
+  const [trailerUrl, setTrailerUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const TMDB_BASE_URL = process.env.TMDB_BASE_URL || "https://api.themoviedb.org/3";
-  const TMDB_API_TOKEN = process.env.TMDB_API_TOKEN;
 
   useEffect(() => {
-    if (!id) return;
-
-    console.log("Fetching movie with ID:", id); 
-
     const fetchMovieDetails = async () => {
-      if (!TMDB_API_TOKEN) {
-        setError("API token is missing.");
+      if (!id) return; // Ensure the ID is available before making the request
+
+      setLoading(true);
+
+      const TMDB_BASE_URL = process.env.TMDB_BASE_URL || "https://api.themoviedb.org/3";
+      const TMDB_API_TOKEN = process.env.TMDB_API_TOKEN;
+
+      // Ensure the API token and base URL are set
+      if (!TMDB_API_TOKEN || !TMDB_BASE_URL) {
+        setError("API token or base URL is missing.");
+        setLoading(false);
         return;
       }
 
       try {
-        setLoading(true);
-        const response = await axios.get(`${TMDB_BASE_URL}/movie/${id}?language=en-US`, {
-          headers: { Authorization: `Bearer ${TMDB_API_TOKEN}` },
-        });
-        setMovie(response.data);
+        // Fetch movie details
+        const movieResponse = await axios.get(
+          `${TMDB_BASE_URL}/movie/${id}?language=en-US`,
+          {
+            headers: { Authorization: `Bearer ${TMDB_API_TOKEN}` },
+          }
+        );
+        setMovie(movieResponse.data);
+
+        // Fetch trailer
+        const trailerResponse = await axios.get(
+          `${TMDB_BASE_URL}/movie/${id}/videos?language=en-US`,
+          {
+            headers: { Authorization: `Bearer ${TMDB_API_TOKEN}` },
+          }
+        );
+        const trailer = trailerResponse.data.results.find((video: any) => video.type === "Trailer");
+        if (trailer) {
+          setTrailerUrl(`https://www.youtube.com/watch?v=${trailer.key}`);
+        }
       } catch (error) {
-        setError("Failed to fetch movie details.");
+        setError("Error fetching movie details");
+        console.error(error);
       } finally {
         setLoading(false);
       }
@@ -51,46 +62,36 @@ export default function MovieDetail() {
     fetchMovieDetails();
   }, [id]);
 
-  if (loading) return <div className="text-white text-center">Loading...</div>;
-  if (error) return <div className="text-red-500 text-center">{error}</div>;
-  if (!movie) return <div className="text-white text-center">Movie not found.</div>;
+  // Handle loading, error, or missing movie data
+  if (loading) return <div>Loading movie details...</div>;
+  if (error) return <div>{error}</div>;
+  if (!movie) return <div>No movie data found.</div>;
 
   return (
-    <div className="max-w-6xl mx-auto p-6 text-white">
-      <h1 className="text-4xl font-bold">{movie.title}</h1>
-      <p className="text-gray-400 mt-2">{movie.release_date} • {movie.runtime} min • {movie.vote_average.toFixed(1)}/10</p>
-
-      <div className="flex gap-6 mt-6">
+    <div className="movie-details-container p-6 max-w-screen-lg mx-auto">
+      <div className="flex flex-col md:flex-row gap-6">
         <img
-          src={movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : "https://via.placeholder.com/500x750"}
+          src={movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : "https://via.placeholder.com/300x450"}
           alt={movie.title}
-          className="w-80 rounded-lg"
+          className="w-full max-w-[300px] rounded-lg shadow-lg"
         />
-
-        <div className="flex-1">
-          {movie.videos?.results.length > 0 && (
-            <iframe
-              width="100%"
-              height="300"
-              src={`https://www.youtube.com/embed/${movie.videos.results[0].key}`}
-              title="Trailer"
-              frameBorder="0"
-              allowFullScreen
-              className="rounded-lg"
-            ></iframe>
+        <div className="flex flex-col justify-between">
+          <h1 className="text-4xl font-semibold text-white">{movie.title}</h1>
+          <p className="text-sm text-gray-300">{movie.overview}</p>
+          <p className="text-xl text-yellow-400">⭐ {movie.vote_average?.toFixed(1) || "N/A"}/10</p>
+          {trailerUrl && (
+            <Button
+              onClick={() => window.open(trailerUrl, "_blank")}
+              className="mt-4 text-primary text-lg font-medium underline-offset-4 hover:underline"
+            >
+              Watch Trailer
+            </Button>
           )}
-
-          <div className="flex gap-2 mt-4">
-            {movie.genres.map((genre) => (
-              <span key={genre.id} className="bg-gray-700 text-white px-3 py-1 rounded-full text-sm">
-                {genre.name}
-              </span>
-            ))}
-          </div>
-
-          <p className="mt-4 text-gray-300">{movie.overview}</p>
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default MovieDetails;
+

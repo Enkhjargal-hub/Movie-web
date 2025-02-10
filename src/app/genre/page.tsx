@@ -1,122 +1,116 @@
 "use client";
 
-import { Separator } from "@/components/ui/separator";
-import axios from "axios";
 import { useEffect, useState } from "react";
-import { Badge } from "@/components/ui/badge";
 import { useRouter, useSearchParams } from "next/navigation";
+import axios from "axios";
+import Genre from "@/components/ui/genre";
+import Image from "next/image";
+import { Star } from "lucide-react";
 
-const TMDB_BASE_URL = process.env.TMDB_BASE_URL;
+const TMDB_BASE_URL = process.env.TMDB_BASE_URL || "https://api.themoviedb.org/3"; // Default if not set
 const TMDB_API_TOKEN = process.env.TMDB_API_TOKEN;
+const TMDB_IMAGE_BASE_URL = process.env.TMDB_IMAGE_SERVICE_URL || "https://image.tmdb.org/t/p"; // Default if not set
 
-type GenresType = { id: number; name: string };
-
-type Movie = {
+interface Movie {
   id: number;
-  original_title: string;
-};
+  title: string;
+  poster_path: string;
+  vote_average: number;
+}
 
-const Genres = () => {
-  const { push } = useRouter();
+export default function GenresPage() {
   const searchParams = useSearchParams();
-  const [genres, setGenres] = useState<GenresType[]>([]);
-  const [selectedGenreIds, setSelectedGenreIds] = useState<string[]>([]);
-  const searchedGenreId = searchParams.get("genreId");
+  const router = useRouter();
   const [movies, setMovies] = useState<Movie[]>([]);
-
- 
-  const getGenresList = async () => {
-    try {
-      const response = await axios.get(`${TMDB_BASE_URL}/genre/movie/list?language=en`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${TMDB_API_TOKEN}`,
-        },
-      });
-
-      setGenres(response.data.genres);
-    } catch (error) {
-      console.error("Axios error:", error);
-    }
-  };
-
-
-  const getMoviesByGenres = async () => {
-    const genreIds = searchParams.get("genreId");
-    if (!genreIds) return;
-
-    try {
-      const response = await axios.get(
-        `${TMDB_BASE_URL}/discover/movie?language=en&with_genres=${genreIds}&page=1`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${TMDB_API_TOKEN}`,
-          },
-        }
-      );
-
-      setMovies(response.data.results);
-    } catch (error) {
-      console.error("Axios error:", error);
-    }
-  };
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState<number>(1);
 
   useEffect(() => {
-    getGenresList();
-  }, []);
+    const fetchMovies = async () => {
+      try {
+        setLoading(true);
+        const genreIds = searchParams.get("genreIds") || "";
+        const pageParam = searchParams.get("page") || "1";
+        setPage(Number(pageParam));
 
-  useEffect(() => {
-    getMoviesByGenres();
-  }, [searchedGenreId]);
+        const response = await axios.get(
+          `${TMDB_BASE_URL}/discover/movie?language=en-US&page=${page}&with_genres=${genreIds}`,
+          {
+            headers: { Authorization: `Bearer ${TMDB_API_TOKEN}` },
+          }
+        );
+        setMovies(response.data.results);
+      } catch (error) {
+        console.error("Error fetching movies:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const handleGenreSelection = (genreId: string) => () => {
-    const updatedGenres = selectedGenreIds.includes(genreId)
-      ? selectedGenreIds.filter((item) => item !== genreId)
-      : [...selectedGenreIds, genreId];
+    fetchMovies();
+  }, [searchParams]);
 
-    setSelectedGenreIds(updatedGenres);
-
-    const queryParams = new URLSearchParams();
-    queryParams.set("genreId", updatedGenres.join(","));
-    push(`/genres?${queryParams.toString()}`);
+  const handlePageChange = (newPage: number) => {
+    const queryParams = new URLSearchParams(searchParams.toString());
+    queryParams.set("page", newPage.toString());
+    router.push(`/genres?${queryParams.toString()}`, { scroll: false });
   };
 
   return (
-    <div className="w-full flex gap-2 h-screen p-4">
-      <div className="w-1/3 space-x-1">
-        {genres.length > 0 &&
-          genres.map((item) => {
-            const genreId = item.id.toString();
-            const isSelected = selectedGenreIds.includes(genreId);
-            return (
-              <Badge
-                onClick={handleGenreSelection(genreId)}
-                variant="outline"
-                key={item.id}
-                className={`cursor-pointer rounded-full ${
-                  isSelected ? "bg-black text-white dark:bg-white dark:text-black" : ""
-                }`}
-              >
-                {item.name}
-              </Badge>
-            );
-          })}
-      </div>
-      <Separator orientation="vertical" />
-      <div className="w-2/3">
-        {movies.length > 0 ? (
-          movies.map((item) => (
-            <div key={item.id} className="text-white">
-              {item.original_title}
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-4">Movie Z - Genres</h1>
+
+      {/* Genre Filter with URL Sync */}
+      <Genre />
+
+      {/* Movie List */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-6">
+        {loading ? (
+          <p className="text-center col-span-full">Loading movies...</p>
+        ) : (
+          movies.map((movie) => (
+            <div
+              key={movie.id}
+              className="rounded-lg shadow-sm overflow-hidden cursor-pointer"
+            >
+              <Image
+                src={`${TMDB_IMAGE_BASE_URL}/w500${movie.poster_path}`}
+                alt={movie.title}
+                width={250}
+                height={375}
+                className="w-full h-auto rounded-lg"
+              />
+              <div className="p-2 bg-gray-100 dark:bg-[#262626]">
+                <div className="flex items-center text-xs ">
+                  <Star
+                    className="w-3 h-3 text-yellow-400 mr-1"
+                    fill="currentColor"
+                  />
+                  {movie.vote_average.toFixed(1)}/10
+                </div>
+              </div>
             </div>
           ))
-        ) : (
-          <p className="text-gray-400">No movies found.</p>
         )}
+      </div>
+
+      {/* Pagination */}
+      <div className="flex justify-center items-center gap-4 mt-6">
+        <button
+          className="px-4 py-2 border rounded-md disabled:opacity-50"
+          disabled={page <= 1}
+          onClick={() => handlePageChange(page - 1)}
+        >
+          Prev
+        </button>
+        <span>Page {page}</span>
+        <button
+          className="px-4 py-2 border rounded-md"
+          onClick={() => handlePageChange(page + 1)}
+        >
+          Next
+        </button>
       </div>
     </div>
   );
-};
-
-export default Genres;
+}
