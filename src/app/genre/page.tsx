@@ -62,8 +62,6 @@ const Genres = () => {
     }
   };
 
-
-
   useEffect(() => {
     getGenresList();
   }, []);
