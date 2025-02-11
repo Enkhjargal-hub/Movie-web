@@ -2,20 +2,24 @@
 
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useRouter } from "next/router";
 import { Movie } from "@/components/ui/types";
 import { Button } from "@/components/ui/button";
+import { useParams } from "next/navigation";
+import Image from "next/image";
 
 const MovieDetail = () => {
-  const router = useRouter();
-  const { id } = router.query; // This gets the dynamic 'id' from the URL
+ 
+  const params = useParams()
+  console.log(params);
+  
+  const { id } = params; 
 
   const [movie, setMovie] = useState<Movie | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!id) return; // Don't fetch data if no id is available
+    if (!id) return; 
 
     const fetchMovieDetails = async () => {
       setLoading(true);
@@ -41,7 +45,7 @@ const MovieDetail = () => {
     };
 
     fetchMovieDetails();
-  }, [id]); // Trigger when id changes
+  }, [id]); 
 
   if (loading) return <div>Loading movie details...</div>;
   if (error) return <div>{error}</div>;
@@ -50,10 +54,11 @@ const MovieDetail = () => {
   return (
     <div className="movie-details-container p-6 max-w-screen-lg mx-auto">
       <div className="flex flex-col md:flex-row gap-6">
-        <img
+        <Image
           src={movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : "https://via.placeholder.com/300x450"}
           alt={movie.title}
-          className="w-full max-w-[300px] rounded-lg shadow-lg"
+          className="absolute inset-0 z-10 transition-all duration-200 group-hover:bg-primary/30 w-40 h-40"
+          fill
         />
         <div className="flex flex-col justify-between">
           <h1 className="text-4xl font-semibold text-white">{movie.title}</h1>

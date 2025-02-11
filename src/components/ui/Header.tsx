@@ -31,7 +31,7 @@ const Movies = () => {
 
   const genreRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown when clicking outside
+  
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (genreRef.current && !genreRef.current.contains(event.target as Node)) {
@@ -42,7 +42,7 @@ const Movies = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Load selected genres from URL on mount
+  
   useEffect(() => {
     const genreIdsFromURL = searchParams.get("genreIds");
     if (genreIdsFromURL) {
@@ -50,7 +50,7 @@ const Movies = () => {
     }
   }, [searchParams]);
 
-  // Fetch genres from TMDB API
+
   useEffect(() => {
     const fetchGenres = async () => {
       if (!TMDB_API_TOKEN || !TMDB_BASE_URL) {
@@ -85,7 +85,7 @@ const Movies = () => {
     fetchGenres();
   }, []);
 
-  // Handle genre selection
+  
   const handleGenreChange = (genreId: number) => {
     const updatedGenres = selectedGenres.includes(genreId)
       ? selectedGenres.filter((id) => id !== genreId)
@@ -106,13 +106,13 @@ const Movies = () => {
   return (
     <div className="fixed top-0 inset-x-0 z-20 h-[59px] bg-background flex items-center justify-center">
       <div className="flex items-center justify-between w-full max-w-screen-xl px-5 lg:px-0">
-        {/* Logo */}
+      
         <Link href="/" className="flex items-center gap-x-2 text-indigo-700">
           <Film className="w-5 h-5" />
           <h4 className="font-bold italic text-base cursor-pointer">Movie Z</h4>
         </Link>
 
-        {/* Genre Dropdown and Search */}
+        
         <div className="relative hidden lg:flex items-center gap-x-3">
           <button
             onClick={() => setIsGenreOpen(!isGenreOpen)}
@@ -121,7 +121,7 @@ const Movies = () => {
             Genre <ChevronDown className="w-4 h-4" />
           </button>
 
-          {/* Genre Dropdown Menu */}
+          
           {isGenreOpen && (
             <div
               ref={genreRef}
@@ -156,13 +156,13 @@ const Movies = () => {
             </div>
           )}
 
-          {/* Search Bar */}
+          
           <div className="relative text-muted-foreground w-[379px]">
             <SearchBar />
           </div>
         </div>
 
-        {/* Theme Toggle & Mobile Search */}
+       
         <div className="flex items-center gap-x-3">
           <Button className="w-9 h-9 sm:hidden" variant={"outline"}>
             <Search />
