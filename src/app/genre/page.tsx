@@ -4,12 +4,10 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 import Genre from "@/components/ui/genre";
-import Image from "next/image";
 import { Star } from "lucide-react";
 
 const TMDB_BASE_URL = process.env.TMDB_BASE_URL || "https://api.themoviedb.org/3"; // Default if not set
 const TMDB_API_TOKEN = process.env.TMDB_API_TOKEN;
-const TMDB_IMAGE_BASE_URL = process.env.TMDB_IMAGE_SERVICE_URL || "https://image.tmdb.org/t/p"; // Default if not set
 
 interface Movie {
   id: number;
@@ -73,13 +71,11 @@ export default function GenresPage() {
               key={movie.id}
               className="rounded-lg shadow-sm overflow-hidden cursor-pointer"
             >
-              <Image
-                src={`${TMDB_IMAGE_BASE_URL}/w500${movie.poster_path}`}
-                alt={movie.title}
-                width={250}
-                height={375}
-                className="w-full h-auto rounded-lg"
-              />
+               <img
+        src={movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : "https://via.placeholder.com/200x300"}
+        alt={movie.title || "Untitled"}
+        className="w-full h-full object-cover"
+      />
               <div className="p-2 bg-gray-100 dark:bg-[#262626]">
                 <div className="flex items-center text-xs ">
                   <Star
