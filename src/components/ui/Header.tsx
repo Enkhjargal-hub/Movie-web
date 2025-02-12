@@ -90,17 +90,18 @@ const Movies = () => {
     const updatedGenres = selectedGenres.includes(genreId)
       ? selectedGenres.filter((id) => id !== genreId)
       : [...selectedGenres, genreId];
-
+  
     setSelectedGenres(updatedGenres);
-
+  
     const queryParams = new URLSearchParams(searchParams);
     if (updatedGenres.length > 0) {
       queryParams.set("genreIds", updatedGenres.join(","));
     } else {
       queryParams.delete("genreIds");
     }
+  
+    router.push(`/genres?${queryParams.toString()}`, { scroll: false });
 
-    router.replace(`/genres?${queryParams.toString()}`, { scroll: false });
   };
 
   return (
