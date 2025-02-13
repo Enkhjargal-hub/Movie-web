@@ -2,13 +2,13 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    // `remotePatterns` болон `domains` параметрүүдийг зөв холбох
+ 
     remotePatterns: [
       {
         hostname: "image.tmdb.org",
       },
       {
-        hostname: "via.placeholder.com", // placeholder-ыг бас оруулна
+        hostname: "via.placeholder.com", 
       },
     ],
   },

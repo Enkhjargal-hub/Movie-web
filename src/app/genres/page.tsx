@@ -24,7 +24,7 @@ export default function GenresPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedGenres, setSelectedGenres] = useState<number[]>([]);
-  const [totalMovies, setTotalMovies] = useState<number>(0); // Нийт киноны тоог хадгалах
+  const [totalMovies, setTotalMovies] = useState<number>(0); 
 
   const page = Number(searchParams.get("page")) || 1;
   const genreIds = searchParams.get("genreIds") || "";
@@ -49,7 +49,7 @@ export default function GenresPage() {
         console.log("API Response:", response.data);
   
         setMovies(response.data.results);
-        setTotalMovies(response.data.total_results); // Нийт киноны тоог шинэчлэх
+        setTotalMovies(response.data.total_results); 
       } catch (error) {
         if (axios.isAxiosError(error)) {
           console.error("Axios error: ", error.message);
@@ -101,7 +101,7 @@ export default function GenresPage() {
         <p className="text-center text-gray-600">Loading movies...</p>
       ) : (
         <div className="space-y-6">
-          <p className="text-center text-lg text-gray-600">Total Movies: {totalMovies}</p> {/* Нийт киноны тоо */}
+          <p className="text-center text-lg text-gray-600">Total Movies: {totalMovies}</p>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {movies.length === 0 ? (
