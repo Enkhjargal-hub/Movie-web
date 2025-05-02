@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
-const TMDB_BASE_URL = process.env.TMDB_BASE_URL || "https://api.themoviedb.org/3";
+const TMDB_BASE_URL =
+  process.env.TMDB_BASE_URL || "https://api.themoviedb.org/3";
 const TMDB_API_TOKEN = process.env.TMDB_API_TOKEN;
 
 export default function Movies() {
@@ -19,7 +20,11 @@ export default function Movies() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchMovies = async (category: string, genre: number | null, setData: (data: Movie[]) => void) => {
+  const fetchMovies = async (
+    category: string,
+    genre: number | null,
+    setData: (data: Movie[]) => void
+  ) => {
     if (!TMDB_API_TOKEN) {
       setError("API token is missing.");
       return;
@@ -27,7 +32,7 @@ export default function Movies() {
 
     try {
       setLoading(true);
-      const genreQuery = genre ? `&with_genres=${genre}` : '';
+      const genreQuery = genre ? `&with_genres=${genre}` : "";
       const response = await axios.get(
         `${TMDB_BASE_URL}/movie/${category}?language=en-US${genreQuery}`,
         {
@@ -35,14 +40,15 @@ export default function Movies() {
         }
       );
       if (response.data && response.data.results) {
-        setData(response.data.results.slice(0, 5)); 
+        setData(response.data.results.slice(0, 5));
       } else {
         setError(`No ${category} movies found.`);
       }
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : "Unknown error occurred";
+      const errorMsg =
+        error instanceof Error ? error.message : "Unknown error occurred";
       setError("Error fetching movies: " + errorMsg);
-      console.error(errorMsg); 
+      console.error(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -57,7 +63,7 @@ export default function Movies() {
 
       try {
         const response = await axios.get(
-          `${TMDB_BASE_URL}/genre/movie/list?language=en-US`,
+          `${TMDB_BASE_URL}/genres/movie/list?language=en-US`,
           {
             headers: { Authorization: `Bearer ${TMDB_API_TOKEN}` },
           }
@@ -127,7 +133,8 @@ const MovieCard = ({ movie }: { movie: Movie }) => {
 
   useEffect(() => {
     const fetchTrailer = async () => {
-      const TMDB_BASE_URL = process.env.TMDB_BASE_URL || "https://api.themoviedb.org/3";
+      const TMDB_BASE_URL =
+        process.env.TMDB_BASE_URL || "https://api.themoviedb.org/3";
       const TMDB_API_TOKEN = process.env.TMDB_API_TOKEN;
 
       if (TMDB_API_TOKEN && movie.id) {
@@ -139,7 +146,9 @@ const MovieCard = ({ movie }: { movie: Movie }) => {
             }
           );
           if (response.data && response.data.results) {
-            const trailer = response.data.results.find((video: any) => video.type === "Trailer");
+            const trailer = response.data.results.find(
+              (video: any) => video.type === "Trailer"
+            );
             if (trailer) {
               setTrailerUrl(`https://www.youtube.com/watch?v=${trailer.key}`);
             } else {
@@ -148,7 +157,7 @@ const MovieCard = ({ movie }: { movie: Movie }) => {
           }
         } catch (error) {
           console.error("Error fetching trailer:", error);
-          setTrailerUrl(null); 
+          setTrailerUrl(null);
         }
       }
     };
@@ -162,7 +171,11 @@ const MovieCard = ({ movie }: { movie: Movie }) => {
       onClick={() => router.push(`/detail/${movie.id}`)}
     >
       <Image
-        src={movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : "https://via.placeholder.com/200x300"}
+        src={
+          movie.poster_path
+            ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+            : "https://via.placeholder.com/200x300"
+        }
         alt={movie.title || "Untitled"}
         className="w-full h-full object-cover"
         fill
@@ -175,7 +188,12 @@ const MovieCard = ({ movie }: { movie: Movie }) => {
       </div>
       {trailerUrl && (
         <div className="absolute top-0 right-0 bg-black bg-opacity-60 text-white p-2 rounded-bl-lg">
-          <a href={trailerUrl} target="_blank" rel="noopener noreferrer" className="text-yellow-400">
+          <a
+            href={trailerUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-yellow-400"
+          >
             Watch Trailer
           </a>
         </div>
@@ -183,4 +201,3 @@ const MovieCard = ({ movie }: { movie: Movie }) => {
     </div>
   );
 };
-

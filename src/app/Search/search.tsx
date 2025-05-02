@@ -49,11 +49,11 @@ const SearchBar = () => {
   }, [query]);
 
   return (
-    <div className="relative ">
-      <div className="relative ">
+    <div className="relative">
+      <div className="relative">
         <Input
           type="text"
-          placeholder="Search for movies..."
+          placeholder="Кино хайх..."
           className="pl-10 w-full h-10 text-sm"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -62,14 +62,14 @@ const SearchBar = () => {
       </div>
 
       {query && results.length > 0 && (
-        <div className="absolute w-full mt-2 bg-white dark:bg-gray-900 rounded-lg shadow-lg max-h-[250px] overflow-y-auto ">
-          {loading && <p className="p-3 text-center text-sm">Loading...</p>}
+        <div className="absolute w-full mt-2 bg-white dark:bg-gray-900 rounded-lg shadow-lg max-h-[250px] overflow-y-auto">
+          {loading && <p className="p-3 text-center text-sm">Татаж байна...</p>}{" "}
           {!loading &&
             results.map((movie) => (
               <div
                 key={movie.id}
                 className="p-3 hover:bg-gray-200 dark:hover:bg-gray-800 cursor-pointer flex items-center gap-3"
-                onClick={() => router.push(`/movie/${movie.id}`)}
+                onClick={() => router.push(`/movie/${movie.id}`)} // Хクリック хийхэд
               >
                 <Image
                   src={`https://image.tmdb.org/t/p/w92${movie.poster_path}`}
@@ -86,6 +86,12 @@ const SearchBar = () => {
                 </div>
               </div>
             ))}
+        </div>
+      )}
+
+      {query && results.length === 0 && !loading && (
+        <div className="absolute w-full mt-2 bg-white dark:bg-gray-900 rounded-lg shadow-lg max-h-[250px] overflow-y-auto p-3 text-center text-sm text-gray-500">
+          Хайлтын үр дүн олдсонгүй
         </div>
       )}
     </div>
